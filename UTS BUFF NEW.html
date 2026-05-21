@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Form Data Mahasiswa</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --text: #111827;
+    --muted: #555;
+    --surface: #ffffff;
+    --surface-soft: #f4f4f4;
+    --border: #ddd;
+    --input-bg: #ffffff;
+    --input-border: #ccc;
+    --button-primary: #16a34a;
+    --button-primary-hover: #15803d;
+    --button-danger: #dc3545;
+    --button-export: #007bff;
+    --button-export-hover: #0069d9;
+    --shadow: rgba(0,0,0,0.1);
+    --table-header: #f4f4f4;
+  }
+
+  /* PERBAIKAN POIN 1: Memperbaiki kontras teks & input di dark mode agar terlihat jelas */
+  .dark-theme {
+    --bg: #0f172a;
+    --text: #f8fafc;
+    --muted: #cbd5e1;
+    --surface: #111827;
+    --surface-soft: #1f2937;
+    --border: #334155;
+    --input-bg: #1f2937;
+    --input-border: #4b5563;
+    --button-export: #2563eb;
+    --button-export-hover: #1d4ed8;
+    --table-header: #1e293b;
+    --shadow: rgba(15, 23, 42, 0.4);
+  }
+
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: var(--bg);
+    color: var(--text);
+  }
+
+  /* PERBAIKAN POIN 5: Menggunakan sistem Grid/Flexbox untuk memisahkan Layout Form dan Tabel Data */
+  .main-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+  @media (min-width: 1024px) {
+    .main-layout {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+    .form-section {
+      flex: 1;
+      position: sticky;
+      top: 80px;
+    }
+    .table-section {
+      flex: 1.5;
+    }
+  }
+
+  .container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  
+  .card-box {
+    background: var(--surface);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px var(--shadow);
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+  }
+
+  form label {
+    display: block;
+    font-weight: bold;
+    margin-top: 15px;
+    margin-bottom: 5px;
+  }
+  input[type="text"], input[type="password"], select, input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text);
+    box-sizing: border-box;
+  }
+  .gender-options {
+    display: flex;
+    gap: 20px;
+    margin-top: 5px;
+  }
+  .gender-options label {
+    font-weight: normal;
+    margin-top: 0;
+  }
+  .gender-options input[type="radio"] {
+    margin-right: 6px;
+  }
+  .dob-selects {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+  }
+  .dob-selects select {
+    flex: 1;
+  }
+  button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  button.submit-btn {
+    background-color: #16a34a;
+  }
+  button.submit-btn:hover {
+    background-color: #15803d;
+  }
+  button.reset-btn {
+    background-color: #dc3545;
+    margin-left: 10px;
+  }
+  .hidden {
+    display: none !important;
+  }
+  .login-screen {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  .login-box {
+    width: min(360px, calc(100% - 32px));
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 28px 24px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+    text-align: center;
+    color: var(--text);
+  }
+  .login-box h2 {
+    margin-bottom: 18px;
+  }
+  .login-box input {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    border: 1px solid var(--input-border);
+    border-radius: 12px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background: var(--input-bg);
+    color: var(--text);
+  }
+  .login-box button {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    margin-top: 0;
+  }
+  .login-box .login-error {
+    color: #dc3545;
+    font-size: 13px;
+    margin-bottom: 10px;
+    min-height: 18px;
+  }
+  
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px var(--shadow);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+  }
+  .controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .controls .search-input {
+    flex: 1 1 200px;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    outline: none;
+    background: var(--input-bg);
+    color: var(--text);
+  }
+  .controls button {
+    margin-top: 0;
+    flex: none;
+  }
+  .sort-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    white-space: nowrap;
+  }
+  .theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .logout-btn {
+    background-color: #dc3545;
+    padding: 10px 16px;
+    font-size: 14px;
+    margin-top: 0;
+  }
+  .logout-btn:hover {
+    background-color: #bd2130;
+  }
+  .theme-toggle-corner {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 10001;
+    width: 46px;
+    height: 46px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+  }
+  .theme-toggle-corner:hover {
+    background: var(--surface-soft);
+  }
+  .sort-button:hover {
+    background: var(--surface-soft);
+  }
+  .export-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: bold;
+    background: var(--button-export);
+    color: #fff;
+    border: none;
+  }
+  
+  /* PERBAIKAN POIN 1: Membuat icon edit/hapus otomatis beradaptasi dengan warna text tema */
+  .dark-theme .delete-icon,
+  .dark-theme .edit-icon {
+    filter: invert(1);
+  }
+  
+  th.sortable { cursor: pointer; user-select: none; }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .export-btn:hover {
+    background: var(--button-export-hover);
+  }
+  th {
+    background-color: var(--table-header);
+    color: var(--text);
+  }
+  td.aksi img {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin: 0 5px;
+  }
+  .pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .pagination .page-info {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .pagination button {
+    padding: 6px 12px;
+    min-width: 34px;
+    height: 34px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0;
+  }
+  .pagination button:hover:not(:disabled) {
+    background: var(--surface-soft);
+  }
+  .pagination button:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+    background: var(--surface-soft);
+  }
+  .error-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 3px;
+    display: none;
+  }
+  input.invalid, select.invalid {
+    border-color: #dc3545 !important;
+    background-color: rgba(220, 53, 69, 0.1);
+  }
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h2>Login Mahasiswa</h2>
+    <div class="login-error" id="loginError"></div>
+    <input type="text" id="loginUsername" placeholder="Username" autocomplete="username" />
+    <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
+    <button type="button" id="loginBtn" class="submit-btn">Login</button>
+  </div>
+</div>
+<button type="button" id="themeToggleBtn" class="theme-toggle-corner" aria-label="Toggle theme">🌙</button>
+
+<div class="container hidden" id="appContainer">
+  
+  <div class="header-container">
+    <h1>Dashboard Akademik</h1>
+    <button type="button" id="logoutBtn" class="logout-btn">🚪 Keluar (Logout)</button>
+  </div>
+
+  <div class="main-layout">
+    
+    <div class="form-section card-box">
+      <h2>Form Input Mahasiswa</h2>
+      <form id="mahasiswaForm">
+        <label for="nim">NIM <span style="color: red;">*</span></label>
+        <input type="text" id="nim" name="nim" placeholder="Masukkan NIM" inputmode="numeric" maxlength="9" minlength="9" pattern="\d{9}" required />
+        <div class="error-message" id="nim-error">NIM harus 9 angka</div>
+
+        <label for="nama">Nama <span style="color: red;">*</span></label>
+        <input type="text" id="nama" name="nama" placeholder="Masukkan Nama" required />
+        <div class="error-message" id="nama-error">Nama harus diisi dan hanya boleh huruf</div>
+
+        <label for="alamat">Alamat <span style="color: red;">*</span></label>
+        <input type="text" id="alamat" name="alamat" placeholder="Masukkan Alamat" required />
+        <div class="error-message" id="alamat-error">Alamat harus diisi</div>
+
+        <label>Jenis Kelamin <span style="color: red;">*</span></label>
+        <div class="gender-options">
+          <label><input type="radio" name="jk" value="Pria" required /> Pria</label>
+          <label><input type="radio" name="jk" value="Wanita" required /> Wanita</label>
+        </div>
+        <div class="error-message" id="jk-error">Jenis Kelamin harus dipilih</div>
+
+        <label>Tanggal Lahir <span style="color: red;">*</span></label>
+        <div class="dob-selects">
+          <select name="tgl" id="tgl" required>
+            <option value="">Tanggal</option>
+          </select>
+          <select name="bln" id="bln" required>
+            <option value="">Bulan</option>
+            <option value="1">Januari</option>
+            <option value="2">Februari</option>
+            <option value="3">Maret</option>
+            <option value="4">April</option>
+            <option value="5">Mei</option>
+            <option value="6">Juni</option>
+            <option value="7">Juli</option>
+            <option value="8">Agustus</option>
+            <option value="9">September</option>
+            <option value="10">Oktober</option>
+            <option value="11">November</option>
+            <option value="12">Desember</option>
+          </select>
+          <select name="thn" id="thn" required>
+            <option value="">Tahun</option>
+          </select>
+        </div>
+        <div class="error-message" id="ttl-error">Tanggal Lahir harus lengkap</div>
+
+        <label for="password">Password <span style="color: red;">*</span></label>
+        <input type="password" id="password" name="password" placeholder="Masukkan Password" inputmode="numeric" maxlength="4" minlength="4" pattern="\d{4}" required />
+        <div class="error-message" id="password-error">Password harus 4 angka</div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Submit</button>
+        <button type="reset" class="reset-btn" id="resetBtn">Reset</button>
+      </form>
+    </div>
+
+    <div class="table-section card-box">
+      <h2>Data Tabel Mahasiswa</h2>
+      <label for="search" style="display:block; font-weight:bold; margin-bottom:8px;">Cari Mahasiswa</label>
+      
+      <div class="controls">
+        <input type="text" id="search" class="search-input" placeholder="Cari NIM, Nama, atau Alamat" />
+        <button type="button" id="sortButton" class="sort-button">Urutkan: A-Z</button>
+        <button type="button" id="exportBtn" class="export-btn">📥 Export</button>
+      </div>
+      
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" onclick="toggleSort('nim')">NIM <span id="sort-nim"></span></th>
+              <th class="sortable" onclick="toggleSort('nama')">Nama <span id="sort-nama"></span></th>
+              <th class="sortable" onclick="toggleSort('alamat')">Alamat <span id="sort-alamat"></span></th>
+              <th>Jenis Kelamin</th>
+              <th>Tanggal Lahir</th>
+              <th>Password</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const LOGIN_USERNAME = 'admin';
+  const LOGIN_PASSWORD = '1234';
+  const loginScreen = document.getElementById('loginScreen');
+  const appContainer = document.getElementById('appContainer');
+  const loginError = document.getElementById('loginError');
+  const loginUsername = document.getElementById('loginUsername');
+  const loginPassword = document.getElementById('loginPassword');
+  const loginBtn = document.getElementById('loginBtn');
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  function applyTheme(theme) {
+    const isDark = theme === 'dark';
+    document.body.classList.toggle('dark-theme', isDark);
+    if (themeToggleBtn) {
+      themeToggleBtn.textContent = isDark ? '☀️' : '🌙';
+    }
+    localStorage.setItem('theme', theme);
+  }
+
+  function loadTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+  }
+
+  /* PERBAIKAN POIN 3: Mengubah validasi session/login. 
+     Menggunakan sessionStorage agar ketika tab/browser ditutup, user WAJIB login kembali demi keamanan data. */
+  function checkLogin() {
+    if (sessionStorage.getItem('isLoggedIn') === 'true') {
+      loginScreen.classList.add('hidden');
+      appContainer.classList.remove('hidden');
+      return true;
+    }
+    loginScreen.classList.remove('hidden');
+    appContainer.classList.add('hidden');
+    return false;
+  }
+
+  function doLogin() {
+    const username = loginUsername.value.trim();
+    const password = loginPassword.value;
+    if (username === LOGIN_USERNAME && password === LOGIN_PASSWORD) {
+      sessionStorage.setItem('isLoggedIn', 'true'); // Diganti ke sessionStorage
+      loginError.textContent = '';
+      loginScreen.classList.add('hidden');
+      appContainer.classList.remove('hidden');
+      loginUsername.value = '';
+      loginPassword.value = '';
+      loadData();
+      renderTable();
+      return;
+    }
+    loginError.textContent = 'Username atau password salah.';
+  }
+
+  // Aksi Logout Manual
+  logoutBtn.addEventListener('click', function() {
+    sessionStorage.removeItem('isLoggedIn');
+    checkLogin();
+  });
+
+  loginBtn.addEventListener('click', doLogin);
+  loginPassword.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+      doLogin();
+    }
+  });
+
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', function() {
+      const nextTheme = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
+      applyTheme(nextTheme);
+    });
+  }
+
+  // Data array
+  let mahasiswaData = [];
+  let editingIndex = null;
+  let currentPage = 1;
+  
+  /* PERBAIKAN POIN 4: Mengubah isi data maksimal per halaman dari 2 data menjadi maksimal 5 data */
+  const rowsPerPage = 5; 
+  
+  let searchTerm = '';
+  let sortColumn = null;
+  let sortDirection = 'asc';
+
+  function getFilteredData() {
+    if (!searchTerm) {
+      return mahasiswaData;
+    }
+    const term = searchTerm.toLowerCase();
+    return mahasiswaData.filter(item =>
+      item.nim.toLowerCase().includes(term) ||
+      item.nama.toLowerCase().includes(term) ||
+      item.alamat.toLowerCase().includes(term)
+    );
+  }
+
+  function loadData() {
+    const saved = localStorage.getItem('mahasiswaData');
+    if (saved) {
+      mahasiswaData = JSON.parse(saved);
+    } else {
+      // Data dummy untuk pengetesan awal
+      mahasiswaData = [
+        { nim: '202312015', nama: 'IMA', alamat: 'BONTANG', jk: 'Wanita', tgl: '1', bln: '1', thn: '1990', password: '1234' },
+        { nim: '202312016', nama: 'BUDI', alamat: 'SAMARINDA', jk: 'Pria', tgl: '15', bln: '5', thn: '1998', password: '4321' },
+        { nim: '202312017', nama: 'ANDI', alamat: 'BALIKPAPAN', jk: 'Pria', tgl: '20', bln: '8', thn: '2000', password: '1111' },
+        { nim: '202312018', nama: 'CITRA', alamat: 'BONTANG', jk: 'Wanita', tgl: '12', bln: '12', thn: '1999', password: '2222' },
+        { nim: '202312019', nama: 'EKO', alamat: 'SAMARINDA', jk: 'Pria', tgl: '3', bln: '2', thn: '1997', password: '3333' },
+        { nim: '202312020', nama: 'FARAH', alamat: 'SANGATTA', jk: 'Wanita', tgl: '28', bln: '6', thn: '2001', password: '4444' }
+      ];
+      saveData();
+    }
+  }
+
+  function saveData() {
+    localStorage.setItem('mahasiswaData', JSON.stringify(mahasiswaData));
+  }
+
+  function renderTable() {
+    const tbody = document.querySelector('table tbody');
+    tbody.innerHTML = '';
+
+    const filteredData = getFilteredData();
+    let processedData = filteredData.slice();
+
+    // Jalankan sistem sorting jika kolom dipilih
+    if (sortColumn) {
+      processedData.sort((a, b) => {
+        let va = (a[sortColumn] || '').toString().toLowerCase();
+        let vb = (b[sortColumn] || '').toString().toLowerCase();
+        
+        if (sortColumn === 'nim') {
+          return sortDirection === 'asc' ? Number(a.nim) - Number(b.nim) : Number(b.nim) - Number(a.nim);
+        }
+        
+        if (va < vb) return sortDirection === 'asc' ? -1 : 1;
+        if (va > vb) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    // Hitung total halaman berdasarkan aturan baru (maks 5 data per halaman)
+    const totalPages = Math.max(1, Math.ceil(processedData.length / rowsPerPage));
+    if (currentPage > totalPages) {
+      currentPage = totalPages;
+    }
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const pageData = processedData.slice(start, start + rowsPerPage);
+
+    if (pageData.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7">Tidak ada data ditemukan</td></tr>`;
+    }
+
+    pageData.forEach((data) => {
+      const actualIndex = mahasiswaData.indexOf(data);
+      const row = tbody.insertRow();
+      const ttl = data.tgl + '-' + String(data.bln).padStart(2, '0') + '-' + data.thn;
+      const hiddenPassword = '•'.repeat(data.password.length);
+      
+      row.innerHTML = `
+        <td>${data.nim}</td>
+        <td>${data.nama}</td>
+        <td>${data.alamat}</td>
+        <td>${data.jk}</td>
+        <td>${ttl}</td>
+        <td>${hiddenPassword}</td>
+        <td class="aksi">
+          <img class="edit-icon" src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" title="Edit" onclick="editData(${actualIndex})" />
+          <img class="delete-icon" src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Delete" title="Delete" onclick="deleteData(${actualIndex})" />
+        </td>
+      `;
+    });
+
+    renderPagination(totalPages, processedData.length, start);
+    updateSortIcons();
+  }
+
+  // Membuat struktur halaman navigasi dinamis
+  function renderPagination(totalPages, totalItems, startIndex) {
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+
+    // Tombol Sebelumnya
+    const prevButton = document.createElement('button');
+    prevButton.textContent = '‹';
+    prevButton.disabled = currentPage === 1;
+    prevButton.addEventListener('click', () => changePage(currentPage - 1));
+    pagination.appendChild(prevButton);
+
+    // Keterangan Data Informasi
+    const info = document.createElement('span');
+    info.className = 'page-info';
+    const startDisplay = totalItems === 0 ? 0 : startIndex + 1;
+    const endDisplay = Math.min(totalItems, startIndex + rowsPerPage);
+    info.textContent = `${startDisplay}–${endDisplay} dari ${totalItems}`;
+    pagination.appendChild(info);
+
+    // Tombol Selanjutnya
+    const nextButton = document.createElement('button');
+    nextButton.textContent = '›';
+    nextButton.disabled = currentPage === totalPages || totalItems === 0;
+    nextButton.addEventListener('click', () => changePage(currentPage + 1));
+    pagination.appendChild(nextButton);
+  }
+
+  function changePage(page) {
+    currentPage = page;
+    renderTable();
+  }
+
+  /* PERBAIKAN POIN 2: Fungsi mengurutkan data kolom secara dinamis dan berfungsi penuh */
+  function toggleSort(column) {
+    if (sortColumn === column) {
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortColumn = column;
+      sortDirection = 'asc';
+    }
+    currentPage = 1;
+    renderTable();
+  }
+
+  /* PERBAIKAN POIN 2: Tombol kontrol utama A-Z / Z-A untuk sorting nama secara cepat global */
+  const sortButton = document.getElementById('sortButton');
+  if (sortButton) {
+    sortButton.addEventListener('click', function() {
+      sortColumn = 'nama';
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      this.textContent = sortDirection === 'asc' ? 'Urutkan: A-Z' : 'Urutkan: Z-A';
+      currentPage = 1;
+      renderTable();
+    });
+  }
+
+  function updateSortIcons() {
+    ['nim','nama', 'alamat'].forEach(col => {
+      const el = document.getElementById('sort-' + col);
+      if (!el) return;
+      if (sortColumn === col) {
+        el.textContent = sortDirection === 'asc' ? ' ▲' : ' ▼';
+      } else {
+        el.textContent = '';
+      }
+    });
+  }
+
+  // Validasi form
+  function validateForm() {
+    let isValid = true;
+    const nim = document.getElementById('nim');
+    const nama = document.getElementById('nama');
+    const alamat = document.getElementById('alamat');
+    const jk = document.querySelector('input[name="jk"]:checked');
+    const tgl = document.getElementById('tgl');
+    const bln = document.getElementById('bln');
+    const thn = document.getElementById('thn');
+    const password = document.getElementById('password');
+
+    document.querySelectorAll('input, select').forEach(el => el.classList.remove('invalid'));
+    document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+
+    if (!/^[0-9]{9}$/.test(nim.value.trim())) {
+      nim.classList.add('invalid');
+      document.getElementById('nim-error').style.display = 'block';
+      isValid = false;
+    }
+    if (!nama.value || nama.value.trim() === '') {
+      nama.classList.add('invalid');
+      document.getElementById('nama-error').style.display = 'block';
+      isValid = false;
+    }
+    if (!alamat.value || alamat.value.trim() === '') {
+      alamat.classList.add('invalid');
+      document.getElementById('alamat-error').style.display = 'block';
+      isValid = false;
+    }
+    if (!jk) {
+      document.getElementById('jk-error').style.display = 'block';
+      isValid = false;
+    }
+    if (!tgl.value || !bln.value || !thn.value) {
+      tgl.classList.add('invalid');
+      bln.classList.add('invalid');
+      thn.classList.add('invalid');
+      document.getElementById('ttl-error').style.display = 'block';
+      isValid = false;
+    }
+    if (!/^[0-9]{4}$/.test(password.value.trim())) {
+      password.classList.add('invalid');
+      document.getElementById('password-error').style.display = 'block';
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  // Form Submit Action
+  document.getElementById('mahasiswaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      alert('Silakan lengkapi semua field dengan benar!');
+      return;
+    }
+
+    const nim = document.getElementById('nim').value;
+    const nama = document.getElementById('nama').value;
+    const alamat = document.getElementById('alamat').value;
+    const jk = document.querySelector('input[name="jk"]:checked').value;
+    const tgl = document.getElementById('tgl').value;
+    const bln = document.getElementById('bln').value;
+    const thn = document.getElementById('thn').value;
+    const password = document.getElementById('password').value;
+
+    const newData = { nim, nama, alamat, jk, tgl, bln, thn, password };
+
+    if (editingIndex !== null) {
+      mahasiswaData[editingIndex] = newData;
+      editingIndex = null;
+      document.getElementById('submitBtn').textContent = 'Submit';
+      alert('Data berhasil diperbarui!');
+    } else {
+      if (mahasiswaData.some(m => m.nim === nim)) {
+        alert('NIM sudah terdaftar!');
+        return;
+      }
+      mahasiswaData.push(newData);
+      alert('Data berhasil ditambahkan!');
+    }
+
+    saveData();
+    renderTable();
+    this.reset();
+    setDayOptions(31);
+  });
+
+  function editData(index) {
+    const data = mahasiswaData[index];
+    document.getElementById('nim').value = data.nim;
+    document.getElementById('nama').value = data.nama;
+    document.getElementById('alamat').value = data.alamat;
+    document.querySelector(`input[name="jk"][value="${data.jk}"]`).checked = true;
+    
+    // Sesuaikan opsi tanggal sebelum memasukkan value edit
+    if (data.bln === '2') setDayOptions(28);
+    else if (['4','6','9','11'].includes(data.bln)) setDayOptions(30);
+    else setDayOptions(31);
+
+    document.getElementById('tgl').value = data.tgl;
+    document.getElementById('bln').value = data.bln;
+    document.getElementById('thn').value = data.thn;
+    document.getElementById('password').value = data.password;
+    
+    editingIndex = index;
+    document.getElementById('submitBtn').textContent = 'Update';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function deleteData(index) {
+    if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+      mahasiswaData.splice(index, 1);
+      saveData();
+      renderTable();
+      alert('Data berhasil dihapus!');
+    }
+  }
+
+  // Sanitasi Input Real-Time
+  document.getElementById('nim').addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+  document.getElementById('password').addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+  document.getElementById('nama').addEventListener('input', function() {
+    this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+  });
+
+  // Membangun opsi Loop Tanggal & Tahun secara dinamis lewat JS agar valid
+  function setDayOptions(maxDays) {
+    const tglSelect = document.getElementById('tgl');
+    if (!tglSelect) return;
+    const current = tglSelect.value;
+    tglSelect.innerHTML = '<option value="">Tanggal</option>';
+    for (let d = 1; d <= maxDays; d++) {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d;
+      tglSelect.appendChild(opt);
+    }
+    if (current && Number(current) <= maxDays) tglSelect.value = current;
+  }
+
+  function initYearOptions() {
+    const thnSelect = document.getElementById('thn');
+    const currYear = new Date().getFullYear();
+    for (let y = 1990; y <= currYear; y++) {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      thnSelect.appendChild(opt);
+    }
+  }
+
+  document.getElementById('bln').addEventListener('change', function() {
+    if (this.value === '2') setDayOptions(28);
+    else if (['4','6','9','11'].includes(this.value)) setDayOptions(30);
+    else setDayOptions(31);
+  });
+
+  document.getElementById('search').addEventListener('input', function() {
+    searchTerm = this.value;
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Fungsi Export Data CSV
+  function exportToCSV() {
+    const filtered = getFilteredData();
+    if (!filtered.length) {
+      alert('Tidak ada data untuk diexport');
+      return;
+    }
+    let csv = '\uFEFF;';
+    csv += 'NIM;Nama;Alamat;Jenis Kelamin;Tanggal Lahir;Password\r\n';
+    filtered.forEach(d => {
+      const ttl = d.tgl + '-' + String(d.bln).padStart(2, '0') + '-' + d.thn;
+      csv += `"${d.nim}";"${d.nama}";"${d.alamat}";"${d.jk}";"${ttl}";"${d.password}"\r\n`;
+    });
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mahasiswa_export.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+
+  // Jalankan Awal Aplikasi
+  setDayOptions(31);
+  initYearOptions();
+  loadTheme();
+
+  if (checkLogin()) {
+    loadData();
+    renderTable();
+  }
+</script>
+</body>
+</html>
